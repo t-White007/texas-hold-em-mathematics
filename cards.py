@@ -73,17 +73,23 @@ class Game:
   def pairsGame(self):
     self.newDeck()
     me = Player("Me")
+    opponent = Player("Opponent")
 
     num_pairs = 0
     num_hands = 0
     identified_pairs = 0
     while True:
       me.draw(self.deck)
+      opponent.draw(self.deck)
       me.draw(self.deck)
+      opponent.draw(self.deck)
 
       self.drawFlop()
       print("Flop: ")
       self.showTable()
+      print(" ")
+      print("Opponent's hand: ")
+      opponent.showHand()
       print(" ")
       print("My hand: ")
       me.showHand()
@@ -97,12 +103,41 @@ class Game:
       self.burnPile = []
       me.hand = []
 
-  def statistics(self):
-    self.num_hands = 0
-    self.num_pairs = 0
-    # ??????
+  def twoPlayerPairsGame(self):
+    self.newDeck()
+    me = Player("Me")
+    opponent = Player("Opponent")
 
-  def askPairsQuestion(self, num_pairs, num_hands): # statistics should not be kept here
+    num_wins = 0
+    num_hands = 0
+    num_losses = 0
+    while True:
+
+      me.draw(self.deck)
+      opponent.draw(self.deck)
+      me.draw(self.deck)
+      opponent.draw(self.deck)
+
+      self.drawFlop()
+      print("Flop: ")
+      self.showTable()
+      print(" ")
+      print("Opponent's hand: ")
+      opponent.showHand()
+      print(" ")
+      print("My hand: ")
+      me.showHand()
+
+      num_wins, num_losses, num_hands = self.askTwoPlayerPairsQuestion(num_wins, num_losses, num_hands)
+      print(" ")
+      self.deck = Deck()
+      self.deck.shuffle()
+      self.table = []
+      self.burnPile = []
+      me.hand = []
+      opponent.hand = []
+
+  def askSinglePlayerPairsQuestion(self, num_pairs, num_hands): # statistics should not be kept here
     num_pairs += input("Number of pairs I hit on this hand: ")
     num_hands += 1
 
@@ -112,6 +147,31 @@ class Game:
     print('Total pairs: {0:2d}'.format(num_pairs))
 
     return num_pairs, num_hands
+
+  def askTwoPlayerPairsQuestion(self, num_wins, num_losses, num_hands): # statistics should not be kept here
+    def tie():
+      return num_hands + 1, num_wins, num_losses
+    def win():
+      return num_hands + 1, num_wins + 1, num_losses
+    def loss():
+      return num_hands + 1, num_wins, num_losses + 1
+
+    switcher = {
+      0: tie,
+      1: win,
+      2: loss
+    }
+
+    num_hands, num_wins, num_losses = switcher.get(input("Who has the higher pair? (tie = 0, me = 1, opponent = 2) : "), "nothing")()
+
+
+    print(" ")
+
+    print('Total games: {0:2d}'.format(num_hands))
+    print('Total number of wins: {0:2d}'.format(num_wins))
+    print('Total number of losses: {0:2d}'.format(num_losses))
+
+    return num_wins, num_losses, num_hands
 
   def checkForPairs(self, hand, table):
 
@@ -131,12 +191,7 @@ class Game:
 
 def main():
   game = Game()
-  for i in range(0,19):
-    game.deck = Deck()
-    game.deck.shuffle()
-    game.burnPile = []
-    game.table = []
-    game.pairsGame()
+  game.twoPlayerPairsGame()
 
 
 if __name__ == '__main__':
