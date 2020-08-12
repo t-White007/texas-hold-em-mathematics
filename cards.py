@@ -45,10 +45,99 @@ class Player:
     for card in self.hand:
       card.show()
 
-deck = Deck()
-deck.shuffle()
+class Game:
+  def __init__(self):
+    self.deck = Deck()
+    self.deck.shuffle()
+    self.table = []
+    self.burnPile = []
 
-bob = Player("Bob")
-bob.draw(deck)
-bob.draw(deck)
-bob.showHand()
+  def newDeck(self):
+    self.deck = Deck()
+    self.deck.shuffle()
+    self.table = []
+    self.burnPile = []
+
+  def burn(self):
+    self.burnPile.append(self.deck.drawCard())
+
+  def drawFlop(self):
+    self.burn()
+    for i in range(0,3):
+      self.table.append(self.deck.drawCard())
+
+  def showTable(self):
+    for card in self.table:
+      card.show()
+
+  def pairsGame(self):
+    self.newDeck()
+    me = Player("Me")
+
+    num_pairs = 0
+    num_hands = 0
+    identified_pairs = 0
+    while True:
+      me.draw(self.deck)
+      me.draw(self.deck)
+
+      self.drawFlop()
+      print("Flop: ")
+      self.showTable()
+      print(" ")
+      print("My hand: ")
+      me.showHand()
+      num_pairs, num_hands = self.askPairsQuestion(num_pairs, num_hands)
+      identified_pairs += self.checkForPairs(me.hand,self.table)
+      print('Computed number of pairs: {0:2d}'.format(identified_pairs))
+      print(" ")
+      self.deck = Deck()
+      self.deck.shuffle()
+      self.table = []
+      self.burnPile = []
+      me.hand = []
+
+  def statistics(self):
+    self.num_hands = 0
+    self.num_pairs = 0
+    # ??????
+
+  def askPairsQuestion(self, num_pairs, num_hands): # statistics should not be kept here
+    num_pairs += input("Number of pairs I hit on this hand: ")
+    num_hands += 1
+
+    print(" ")
+
+    print('Total games: {0:2d}'.format(num_hands))
+    print('Total pairs: {0:2d}'.format(num_pairs))
+
+    return num_pairs, num_hands
+
+  def checkForPairs(self, hand, table):
+
+    table_values = []
+    for card in table:
+      table_values.append(card.value)
+
+    for card in hand:
+      if card.value in table_values:
+        return True # a pair is found on the table
+
+    if hand[0].value == hand[1].value:
+      return True # the player is holding a pair
+
+    return False # no pairs were found
+
+
+def main():
+  game = Game()
+  for i in range(0,19):
+    game.deck = Deck()
+    game.deck.shuffle()
+    game.burnPile = []
+    game.table = []
+    game.pairsGame()
+
+
+if __name__ == '__main__':
+    main()
